@@ -1,0 +1,643 @@
+!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Idoneidad BB Glow & BB Lips</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        .card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 1rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .option-button {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .selected-option {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            font-weight: 600;
+        }
+        /* Estilo para la barra de progreso */
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-indicator {
+            height: 100%;
+            background-color: #3b82f6; /* Blue 500 */
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="test-container" class="w-full max-w-xl bg-white card p-6 sm:p-8">
+        
+        <!-- Encabezado y Progreso -->
+        <header class="mb-6 border-b pb-4">
+            <h1 class="text-2xl font-bold text-gray-800">Test de Idoneidad Integral (30 Preguntas)</h1>
+            <p class="text-sm text-gray-500">BB Glow & BB Lips: Evaluación Física, Mental y Emocional/Compromiso</p>
+        </header>
+
+        <!-- Área de Preguntas -->
+        <div id="question-area">
+            <div id="progress-container" class="mb-4">
+                <p class="text-sm font-medium text-gray-600 mb-1">
+                    Progreso: <span id="current-q">0</span> de <span id="total-q">30</span>
+                </p>
+                <div class="progress-bar">
+                    <div id="progress-indicator" class="progress-indicator w-0"></div>
+                </div>
+            </div>
+            
+            <h2 id="question-text" class="text-xl font-semibold mb-4 text-gray-800"></h2>
+            <div id="options-container" class="space-y-3">
+                <!-- Opciones se inyectarán aquí -->
+            </div>
+            
+            <div class="mt-8 flex justify-between">
+                <button id="prev-button" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg opacity-50 cursor-not-allowed transition duration-150" disabled>
+                    Anterior
+                </button>
+                <button id="next-button" class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-150 shadow-md shadow-blue-300 opacity-50 cursor-not-allowed" disabled>
+                    Siguiente
+                </button>
+            </div>
+        </div>
+
+        <!-- Área de Resultados (Oculta inicialmente) -->
+        <div id="results-area" class="hidden text-center">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Resultado de Idoneidad</h2>
+            
+            <div class="mb-6 p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
+                <p class="text-5xl font-extrabold text-blue-600 mb-2">
+                    <span id="final-score">0</span><span class="text-3xl">/100</span>
+                </p>
+                <p id="score-message" class="text-xl font-semibold text-blue-700"></p>
+            </div>
+
+            <h3 class="text-xl font-bold text-gray-700 mb-3 text-left">Recomendaciones Personalizadas</h3>
+            <div id="recommendations-list" class="space-y-3 text-left">
+                <!-- Recomendaciones se inyectarán aquí -->
+            </div>
+
+            <button onclick="startTest()" class="mt-8 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-150 shadow-md shadow-blue-300">
+                Reiniciar Test
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Definición de las preguntas, opciones y pesos de puntuación (100 puntos en total)
+        // La suma de puntajes positivos es 100. Las respuestas negativas aplican grandes deducciones (flags).
+        const questions = [
+            // --- 10 PREGUNTAS FÍSICAS (Puntuación máxima: 45) ---
+            {
+                id: 1,
+                category: "Física",
+                questionText: "¿Ha tomado Isotretinoína (Accutane) o un medicamento similar en los últimos 6 meses?",
+                options: [
+                    { text: "Sí", score: -40, reason: "Contraindicación Absoluta (Accutane o similar). La piel necesita 6 meses de recuperación para evitar cicatrices graves.", flag: "ACCUTANE" },
+                    { text: "No", score: 5, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+            {
+                id: 2,
+                category: "Física",
+                questionText: "¿Tiene alguna infección activa (acné pustuloso, herpes labial, heridas abiertas) en el área de tratamiento?",
+                options: [
+                    { text: "Sí", score: -30, reason: "Contraindicación Absoluta (Infección Activa). Alto riesgo de propagación e infección grave.", flag: "INFECTION" },
+                    { text: "No", score: 5, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+            {
+                id: 3,
+                category: "Física",
+                questionText: "¿Está embarazada o en periodo de lactancia?",
+                options: [
+                    { text: "Sí", score: -10, reason: "Contraindicación Relativa (Embarazo/Lactancia). Por precaución hormonal y posible paso de productos al torrente sanguíneo.", flag: "PREGNANCY" },
+                    { text: "No", score: 5, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+            {
+                id: 4,
+                category: "Física",
+                questionText: "¿Padece Diabetes no controlada, trastornos hemorrágicos o tendencia a cicatrización queloide?",
+                options: [
+                    { text: "Sí (alguna de estas)", score: -10, reason: "Riesgo de Cicatrización/Infección. La cicatrización deficiente aumenta el riesgo de complicaciones.", flag: "HEALING_RISK" },
+                    { text: "No", score: 5, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+            {
+                id: 5,
+                category: "Física",
+                questionText: "¿Está bajo tratamiento de quimioterapia o radioterapia actualmente?",
+                options: [
+                    { text: "Sí", score: -10, reason: "Contraindicación Absoluta (Tratamiento Oncológico Activo). Requiere autorización médica.", flag: "ONCOLOGY" },
+                    { text: "No", score: 5, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+            {
+                id: 6,
+                category: "Física",
+                questionText: "¿Ha tenido quemaduras solares o un tratamiento con peeling químico/láser profundo en los últimos 30 días en la zona?",
+                options: [
+                    { text: "Sí", score: -5, reason: "Trauma Reciente en la Piel. El área necesita estar completamente sana y sin irritación.", flag: "RECENT_TRAUMA" },
+                    { text: "No", score: 3, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+            {
+                id: 7,
+                category: "Física",
+                questionText: "¿Sufre de alergia conocida al acero inoxidable, níquel (común en agujas) o a anestésicos tópicos?",
+                options: [
+                    { text: "Sí", score: -5, reason: "Riesgo de Reacción Alérgica. Debe realizarse una prueba de parche antes de usar herramientas o productos.", flag: "ALLERGY" },
+                    { text: "No", score: 3, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+            {
+                id: 8,
+                category: "Física",
+                questionText: "¿Ha tenido alguna vez cáncer de piel o lesiones precancerosas en la zona a tratar?",
+                options: [
+                    { text: "Sí", score: -10, reason: "Riesgo de Cáncer de Piel. Requiere autorización explícita de un dermatólogo.", flag: "CANCER" },
+                    { text: "No", score: 3, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+            {
+                id: 9,
+                category: "Física",
+                questionText: "¿Está tomando anticoagulantes o padece un trastorno de la coagulación que le cause sangrado fácil?",
+                options: [
+                    { text: "Sí", score: -5, reason: "Riesgo de Sangrado. Aumenta el riesgo de que el pigmento entre en la dermis y cause granulomas.", flag: "ANTICOAGULANTS" },
+                    { text: "No", score: 3, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+            {
+                id: 10,
+                category: "Física",
+                questionText: "¿Tiene micropigmentación o tatuajes permanentes previos en el área BB Glow o BB Lips?",
+                options: [
+                    { text: "Sí", score: 1, reason: "Requiere Evaluación. El pigmento previo puede interactuar y el resultado final debe ser evaluado por un especialista.", flag: "TATTOO_EVAL" },
+                    { text: "No", score: 3, reason: "Apto en este aspecto.", flag: null }
+                ]
+            },
+
+            // --- 10 PREGUNTAS MENTALES / EXPECTATIVAS (Puntuación máxima: 30) ---
+            {
+                id: 11,
+                category: "Mental",
+                questionText: "¿Su objetivo principal es nutrir/revitalizar la piel, por encima del efecto *maquillaje* de color?",
+                options: [
+                    { text: "Sí", score: 3, reason: "Motivación adecuada: enfoque en la salud progresiva.", flag: null },
+                    { text: "No, solo busco el efecto 'maquillaje' permanente.", score: -5, reason: "Motivación inadecuada. Expectativas irrealistas de duración de color.", flag: "MOTIVATION" }
+                ]
+            },
+            {
+                id: 12,
+                category: "Mental",
+                questionText: "¿Ha comprendido que el efecto color del BB Glow dura solo 1 a 3 días y que el beneficio principal es la nutrición progresiva de la piel?",
+                options: [
+                    { text: "Sí, mis expectativas son realistas.", score: 3, reason: "Manejo de Expectativas OK.", flag: null },
+                    { text: "No, esperaba que durara 6 meses o más.", score: -5, reason: "Expectativas Irrealistas. El efecto de maquillaje es muy corto.", flag: "EXPECTATION_COLOR" }
+                ]
+            },
+            {
+                id: 13,
+                category: "Mental",
+                questionText: "¿Acepta que los resultados visibles y duraderos se logran en 3 a 4 sesiones espaciadas (no es una solución rápida)?",
+                options: [
+                    { text: "Sí, acepto que es un proceso gradual.", score: 3, reason: "Mentalidad Progresiva OK.", flag: null },
+                    { text: "Quiero una solución inmediata en una sola visita.", score: -5, reason: "Mentalidad de 'Solución Rápida'. Los resultados son progresivos.", flag: "QUICK_FIX" }
+                ]
+            },
+            {
+                id: 14,
+                category: "Mental",
+                questionText: "¿Ha leído o entiende los riesgos de granulomas o manchas permanentes si el pigmento se aplica incorrectamente (en la dermis)?",
+                options: [
+                    { text: "Sí, entiendo el riesgo técnico.", score: 3, reason: "Conciencia del Riesgo OK.", flag: null },
+                    { text: "No, no conocía estos riesgos.", score: -2, reason: "Falta de Conciencia del Riesgo. Necesita revisar el consentimiento informado.", flag: "RISK_AWARENESS" }
+                ]
+            },
+            {
+                id: 15,
+                category: "Mental",
+                questionText: "¿Buscaría la aprobación de un dermatólogo si tuviera alguna duda sobre una condición de piel preexistente?",
+                options: [
+                    { text: "Sí, siempre consultaría a un experto.", score: 3, reason: "Prioriza la consulta profesional.", flag: null },
+                    { text: "No, confío solo en el esteticista.", score: -2, reason: "No prioriza la consulta médica. Requiere consulta si hay dudas.", flag: "DOCTOR_CONSULT" }
+                ]
+            },
+            {
+                id: 16,
+                category: "Mental",
+                questionText: "¿Entiende que el tratamiento NO erradica el acné grave, las manchas profundas o las arrugas, sino que las mejora progresivamente?",
+                options: [
+                    { text: "Sí, entiendo sus limitaciones.", score: 3, reason: "Expectativas Ajustadas OK.", flag: null },
+                    { text: "No, creo que lo 'arreglará' todo por completo.", score: -2, reason: "Sobreestimación del tratamiento. Necesita ajustar expectativas de resultado.", flag: "NO_ERADICATION" }
+                ]
+            },
+            {
+                id: 17,
+                category: "Mental",
+                questionText: "¿Considera que el Dermapen usa nanoagujas/microagujas superficiales y NO es un tatuaje/micropigmentación?",
+                options: [
+                    { text: "Sí, entiendo la diferencia de técnica.", score: 3, reason: "Conocimiento de la Técnica OK.", flag: null },
+                    { text: "No, lo considero un tipo de tatuaje facial.", score: -2, reason: "Confusión de la Técnica. No es tatuaje.", flag: "TECHNIQUE_KNOWLEDGE" }
+                ]
+            },
+            {
+                id: 18,
+                category: "Mental",
+                questionText: "¿Entiende la necesidad de usar protección solar SPF 50+ rigurosamente *antes y después* de las sesiones?",
+                options: [
+                    { text: "Sí, me comprometo a la protección solar total.", score: 3, reason: "Compromiso de Protección Solar OK.", flag: null },
+                    { text: "No, suelo olvidarme o no me gusta el protector solar.", score: -5, reason: "Riesgo de Hiperpigmentación. La protección solar es crucial.", flag: "SUN_COMMITMENT" }
+                ]
+            },
+            {
+                id: 19,
+                category: "Mental",
+                questionText: "¿Busca una piel 'perfecta' como la ve en redes sociales (filtros) o una mejora realista de su textura y tono natural?",
+                options: [
+                    { text: "Busco una mejora realista y natural.", score: 3, reason: "Expectativa de Imagen Realista OK.", flag: null },
+                    { text: "Busco la 'piel de filtro' que veo en las fotos.", score: -2, reason: "Expectativas de Imagen Irrealistas. El resultado será natural.", flag: "PHOTO_EXPECTATION" }
+                ]
+            },
+            {
+                id: 20,
+                category: "Mental",
+                questionText: "¿Siente que ha tomado una decisión informada y reflexiva sobre este procedimiento, sin dudas importantes?",
+                options: [
+                    { text: "Sí, me siento segura(o) de mi decisión.", score: 3, reason: "Decisión Informada OK.", flag: null },
+                    { text: "No, todavía tengo muchas dudas y no estoy segura(o).", score: -2, reason: "Dudas Pendientes. Aplace la decisión hasta sentirse 100% informado.", flag: "INFORMED_DECISION" }
+                ]
+            },
+
+            // --- 10 PREGUNTAS EMOCIONALES / COMPROMISO (Puntuación máxima: 25) ---
+            {
+                id: 21,
+                category: "Emocional",
+                questionText: "¿Siente una ansiedad o estrés *extremo* relacionado con su apariencia actual que busca corregir con urgencia?",
+                options: [
+                    { text: "Sí, el estrés por mi apariencia es muy alto.", score: -5, reason: "Alto Estrés/Dismorfia. Es mejor tratar la raíz emocional antes de un procedimiento estético.", flag: "STRESS" },
+                    { text: "No, estoy tranquila(o) y esto es un extra para mi cuidado.", score: 3, reason: "Estado emocional estable para decisiones de autocuidado.", flag: null }
+                ]
+            },
+            {
+                id: 22,
+                category: "Emocional",
+                questionText: "¿Su decisión está motivada principalmente por presión social, presión de pareja o el deseo de un tercero?",
+                options: [
+                    { text: "Sí, me siento presionada(o).", score: -5, reason: "Presión Externa. La decisión debe ser 100% personal.", flag: "EXTERNAL_PRESSURE" },
+                    { text: "No, es una decisión personal.", score: 3, reason: "Motivación personal y autónoma OK.", flag: null }
+                ]
+            },
+            {
+                id: 23,
+                category: "Emocional",
+                questionText: "¿Tiene la paciencia necesaria para esperar la fase de remodelación de la piel (días 6-30) para ver el resultado real y no el efecto inmediato?",
+                options: [
+                    { text: "Sí, soy paciente con los resultados progresivos.", score: 3, reason: "Paciencia y Madurez de Expectativas OK.", flag: null },
+                    { text: "No, necesito ver el resultado final en la primera semana.", score: -2, reason: "Falta de Paciencia. Los resultados reales toman tiempo.", flag: "PATIENCE" }
+                ]
+            },
+            {
+                id: 24,
+                category: "Emocional",
+                questionText: "¿Ha experimentado cambios emocionales mayores (duelo, separación, crisis) en las últimas 4 semanas que puedan afectar su juicio?",
+                options: [
+                    { text: "Sí", score: -2, reason: "Inestabilidad Emocional Reciente. Puede afectar el juicio y la adherencia al tratamiento.", flag: "MOOD_STABILITY" },
+                    { text: "No", score: 3, reason: "Juicio y estabilidad emocional OK.", flag: null }
+                ]
+            },
+            {
+                id: 25,
+                category: "Compromiso",
+                questionText: "¿Puede comprometerse financieramente con el paquete de 3-4 sesiones necesarias sin causarle un estrés económico significativo?",
+                options: [
+                    { text: "Sí, tengo la estabilidad financiera para el paquete.", score: 3, reason: "Estabilidad Financiera OK.", flag: null },
+                    { text: "No, el costo me genera mucha preocupación y estrés.", score: -2, reason: "Estrés Financiero. La ansiedad puede afectar la percepción del resultado.", flag: "FINANCIAL_STABILITY" }
+                ]
+            },
+            {
+                id: 26,
+                category: "Compromiso",
+                questionText: "¿Puede asegurar que seguirá las instrucciones de cuidado posterior (evitar maquillaje, sudor, piscina, sol) durante las primeras 48 horas?",
+                options: [
+                    { text: "Sí, puedo cumplir con el cuidado posterior.", score: 3, reason: "Adherencia al Cuidado Posterior OK.", flag: null },
+                    { text: "No, tengo eventos o compromisos que me lo impiden.", score: -5, reason: "Riesgo de Infección/Mala Curación. El cuidado posterior es crucial.", flag: "AFTERCARE_COMMITMENT" }
+                ]
+            },
+            {
+                id: 27,
+                category: "Compromiso",
+                questionText: "¿Está dispuesto(a) a reprogramar su cita si presenta un brote de acné o herpes el día del tratamiento sin enojarse o frustrarse?",
+                options: [
+                    { text: "Sí, acepto la flexibilidad por seguridad.", score: 3, reason: "Flexibilidad y Seguridad OK.", flag: null },
+                    { text: "No, exigiré que me atiendan ese día.", score: -2, reason: "Rigidez. La seguridad del cliente es la prioridad del especialista.", flag: "FLEXIBILITY" }
+                ]
+            },
+            {
+                id: 28,
+                category: "Compromiso",
+                questionText: "¿Puede evitar el uso de productos con retinoides/ácidos exfoliantes en la zona durante la semana previa y posterior al tratamiento?",
+                options: [
+                    { text: "Sí, pausaré esos productos.", score: 3, reason: "Adherencia al Protocolo de Productos OK.", flag: null },
+                    { text: "No, necesito usarlos todos los días.", score: -2, reason: "Riesgo de Irritación. Debe suspender el uso de estos productos.", flag: "PRODUCT_ADHERENCE" }
+                ]
+            },
+            {
+                id: 29,
+                category: "Compromiso",
+                questionText: "¿Acepta que el especialista pueda negarse a realizar el tratamiento si detecta una contraindicación de último momento?",
+                options: [
+                    { text: "Sí, respeto el criterio profesional de seguridad.", score: 3, reason: "Respeto por el Criterio Profesional OK.", flag: null },
+                    { text: "No, si ya pagué, deben hacérmelo.", score: -2, reason: "Falta de Respeto por el Criterio Profesional. La seguridad es primero.", flag: "PROFESSIONAL_RESPECT" }
+                ]
+            },
+            {
+                id: 30,
+                category: "Compromiso",
+                questionText: "¿Dispone de tiempo libre (48 horas) para el proceso de curación sin necesidad de maquillarse para ir al trabajo o eventos sociales?",
+                options: [
+                    { text: "Sí, he bloqueado mi agenda.", score: 3, reason: "Disponibilidad de Tiempo de Curación OK.", flag: null },
+                    { text: "No, debo maquillarme y asistir a eventos de inmediato.", score: -5, reason: "Falta de Tiempo de Curación. Riesgo de infección al usar maquillaje.", flag: "HEALING_TIME" }
+                ]
+            },
+        ];
+
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // { questionId: selectedOptionObject }
+
+        // Referencias a elementos del DOM
+        const questionArea = document.getElementById('question-area');
+        const resultsArea = document.getElementById('results-area');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const progressIndicator = document.getElementById('progress-indicator');
+        const currentQSpan = document.getElementById('current-q');
+        const totalQSpan = document.getElementById('total-q');
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            totalQSpan.textContent = questions.length;
+            startTest();
+        });
+
+        // --- FUNCIONES DE CONTROL DEL TEST ---
+
+        function startTest() {
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            resultsArea.classList.add('hidden');
+            questionArea.classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function updateNavigation() {
+            const currentQuestion = questions[currentQuestionIndex];
+            const isAnswered = userAnswers[currentQuestion.id] !== undefined;
+
+            // Botón Siguiente
+            if (currentQuestionIndex === questions.length - 1) {
+                nextButton.textContent = 'Ver Resultados';
+            } else {
+                nextButton.textContent = 'Siguiente';
+            }
+            
+            // Habilitar/Deshabilitar Siguiente
+            if (isAnswered) {
+                nextButton.disabled = false;
+                nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                nextButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            } else {
+                nextButton.disabled = true;
+                nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+                nextButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            }
+
+            // Habilitar/Deshabilitar Anterior
+            if (currentQuestionIndex > 0) {
+                prevButton.disabled = false;
+                prevButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevButton.disabled = true;
+                prevButton.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function renderQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            // Actualizar el texto y el progreso
+            questionText.innerHTML = `(${currentQuestion.category}) - ${currentQuestion.questionText}`;
+            currentQSpan.textContent = currentQuestionIndex + 1;
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressIndicator.style.width = `${progress}%`;
+
+            optionsContainer.innerHTML = '';
+            
+            // Renderizar opciones
+            currentQuestion.options.forEach((option) => {
+                const isSelected = userAnswers[currentQuestion.id] && userAnswers[currentQuestion.id].text === option.text;
+                const button = document.createElement('button');
+                
+                button.className = `option-button w-full p-3 text-left border-2 border-gray-200 rounded-lg text-gray-700 transition duration-150 ${isSelected ? 'selected-option' : 'hover:border-blue-400'}`;
+                button.textContent = option.text;
+                button.onclick = () => selectOption(currentQuestion.id, option);
+                
+                optionsContainer.appendChild(button);
+            });
+
+            updateNavigation();
+        }
+
+        function selectOption(questionId, option) {
+            userAnswers[questionId] = option;
+            renderQuestion(); // Re-render para actualizar el estado visual de la opción seleccionada
+        }
+
+        function navigate(direction) {
+            if (direction === 'next') {
+                if (currentQuestionIndex < questions.length - 1) {
+                    currentQuestionIndex++;
+                    renderQuestion();
+                } else {
+                    calculateAndDisplayResults();
+                }
+            } else if (direction === 'prev' && currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        prevButton.onclick = () => navigate('prev');
+        nextButton.onclick = () => navigate('next');
+
+        // --- FUNCIONES DE RESULTADOS Y CÁLCULO ---
+
+        function calculateAndDisplayResults() {
+            let finalScore = 0;
+            const flags = []; // Para almacenar las razones específicas de las deducciones (respuestas con score < 0)
+
+            // 1. Calcular la puntuación
+            questions.forEach(q => {
+                const answer = userAnswers[q.id];
+                if (answer) {
+                    finalScore += answer.score;
+                    if (answer.score < 0 || answer.flag) { // Si hay una deducción o una bandera de riesgo
+                        flags.push({
+                            id: q.id,
+                            category: q.category,
+                            question: q.questionText,
+                            reason: answer.reason,
+                            flag: answer.flag,
+                            score: answer.score
+                        });
+                    }
+                }
+            });
+
+            // Asegurar que el puntaje no baje de 0
+            if (finalScore < 0) finalScore = 0;
+
+            // 2. Mostrar el área de resultados
+            questionArea.classList.add('hidden');
+            resultsArea.classList.remove('hidden');
+            
+            document.getElementById('final-score').textContent = finalScore;
+            
+            // 3. Determinar el mensaje principal
+            let scoreMessage = '';
+            let recommendationsColor = '';
+            if (finalScore >= 85) {
+                scoreMessage = "¡Excelente Idoneidad! Candidato Ideal. Puede avanzar a exámenes concretos.";
+                recommendationsColor = 'text-green-600';
+            } else if (finalScore >= 65) {
+                scoreMessage = "Buena Idoneidad. Requiere ajustes menores antes del tratamiento.";
+                recommendationsColor = 'text-blue-700';
+            } else if (finalScore >= 40) {
+                scoreMessage = "Idoneidad Moderada. Se requieren correcciones importantes y re-evaluación.";
+                recommendationsColor = 'text-orange-500';
+            } else {
+                scoreMessage = "Baja Idoneidad. Consulte a un especialista y aplace el tratamiento indefinidamente.";
+                recommendationsColor = 'text-red-600';
+            }
+            document.getElementById('score-message').textContent = scoreMessage;
+            document.getElementById('score-message').className = `text-xl font-semibold ${recommendationsColor}`;
+
+            // 4. Generar Recomendaciones
+            const recommendationsList = document.getElementById('recommendations-list');
+            recommendationsList.innerHTML = '';
+
+            const criticalFlags = flags.filter(f => ['ACCUTANE', 'INFECTION', 'ONCOLOGY', 'CANCER', 'HEALING_RISK'].includes(f.flag));
+            const mediumFlags = flags.filter(f => ['PREGNANCY', 'ALLERGY', 'ANTICOAGULANTS', 'STRESS', 'EXTERNAL_PRESSURE', 'SUN_COMMITMENT', 'AFTERCARE_COMMITMENT', 'HEALING_TIME'].includes(f.flag));
+            const lowFlags = flags.filter(f => !criticalFlags.includes(f) && !mediumFlags.includes(f));
+            
+            // Si el puntaje es óptimo y no hay banderas de alto riesgo
+            if (finalScore >= 85 && criticalFlags.length === 0) {
+                 const finalMsg = { text: "¡Felicidades! Su evaluación integral es óptima. Está apto(a) para proceder con exámenes concretos (ficha clínica detallada, prueba de alergia a pigmentos) y planificar su tratamiento.", color: "text-green-600" };
+                 recommendationsList.appendChild(createListItem(finalMsg));
+                 return;
+            }
+
+            // --- Recomendaciones de Alto Riesgo (Rojo) ---
+            if (criticalFlags.length > 0) {
+                const header = { text: "⚠️ RIESGO ALTO (Contraindicación Absoluta): Debe corregir lo siguiente antes de considerar el tratamiento.", color: "text-red-600" };
+                recommendationsList.appendChild(createListItem(header));
+
+                if (flags.some(f => f.flag === "ACCUTANE")) {
+                    recommendationsList.appendChild(createListItem({ text: "Consulta Dermatológica OBLIGATORIA: Espere 6 meses desde la última dosis de Isotretinoína. No se puede proceder antes.", color: "text-red-600" }));
+                }
+                if (flags.some(f => f.flag === "INFECTION")) {
+                    recommendationsList.appendChild(createListItem({ text: "Tratamiento y Curación de Infecciones: Aplace el tratamiento hasta la curación total del área (acné, herpes, heridas).", color: "text-red-600" }));
+                }
+                if (flags.some(f => f.flag === "ONCOLOGY" || f.flag === "CANCER")) {
+                    recommendationsList.appendChild(createListItem({ text: "Autorización Médica: Requiere la autorización explícita de su oncólogo/dermatólogo si está o ha estado en tratamiento oncológico.", color: "text-red-600" }));
+                }
+                if (flags.some(f => f.flag === "HEALING_RISK")) {
+                    recommendationsList.appendChild(createListItem({ text: "Evaluación Médica de Curación: Si tiene diabetes no controlada o tendencia a queloides, necesita una evaluación médica previa para evaluar riesgos.", color: "text-red-600" }));
+                }
+            }
+            
+            // --- Recomendaciones de Riesgo Medio (Naranja) ---
+            if (mediumFlags.length > 0) {
+                const header = { text: "🔶 RIESGO MEDIO (Contraindicación Relativa): Soluciones y precauciones necesarias.", color: "text-orange-500" };
+                recommendationsList.appendChild(createListItem(header));
+
+                if (flags.some(f => f.flag === "PREGNANCY")) {
+                    recommendationsList.appendChild(createListItem({ text: "Postergación por Embarazo/Lactancia: Posponer el tratamiento hasta finalizar este periodo.", color: "text-orange-500" }));
+                }
+                if (flags.some(f => f.flag === "SUN_COMMITMENT" || f.flag === "AFTERCARE_COMMITMENT" || f.flag === "HEALING_TIME")) {
+                    recommendationsList.appendChild(createListItem({ text: "Compromiso de Cuidados Post-Tratamiento: Reorganice su agenda para asegurar 48 horas de curación y el uso constante de protección solar.", color: "text-orange-500" }));
+                }
+                if (flags.some(f => f.flag === "ALLERGY" || f.flag === "ANTICOAGULANTS")) {
+                    recommendationsList.appendChild(createListItem({ text: "Pruebas de Seguridad: Realizar una prueba de parche obligatoria antes del procedimiento. Si toma anticoagulantes, consulte a su médico sobre una pausa temporal.", color: "text-orange-500" }));
+                }
+                if (flags.some(f => f.flag === "STRESS" || f.flag === "EXTERNAL_PRESSURE")) {
+                    recommendationsList.appendChild(createListItem({ text: "Bienestar Emocional: Asegúrese de que su decisión sea 100% personal y que su nivel de ansiedad esté manejado antes del procedimiento.", color: "text-orange-500" }));
+                }
+            }
+            
+            // --- Recomendaciones de Expectativas/Compromiso (Azul) ---
+            if (lowFlags.length > 0) {
+                const header = { text: "📘 RECOMENDACIONES DE AJUSTE (Expectativas/Adherencia): Aspectos a mejorar para un resultado satisfactorio.", color: "text-blue-500" };
+                recommendationsList.appendChild(createListItem(header));
+            
+                if (flags.some(f => f.flag === "EXPECTATION_COLOR" || f.flag === "MOTIVATION" || f.flag === "QUICK_FIX")) {
+                    recommendationsList.appendChild(createListItem({ text: "Reajuste de Expectativas: El color es temporal (1-3 días); el resultado es nutrición y progresivo (3-4 sesiones).", color: "text-blue-500" }));
+                }
+                if (flags.some(f => f.flag === "RISK_AWARENESS" || f.flag === "INFORMED_DECISION")) {
+                    recommendationsList.appendChild(createListItem({ text: "Revisión de Riesgos: Lea el consentimiento informado detalladamente, incluyendo los riesgos de granulomas e hiperpigmentación.", color: "text-blue-500" }));
+                }
+                if (flags.some(f => f.flag === "PATIENCE" || f.flag === "FINANCIAL_STABILITY")) {
+                    recommendationsList.appendChild(createListItem({ text: "Planificación: Asegure la estabilidad financiera para el paquete completo de sesiones y tenga paciencia para el resultado final.", color: "text-blue-500" }));
+                }
+            }
+        }
+
+        function createListItem(recommendation) {
+            const div = document.createElement('div');
+            // Determinar clases de color basado en la bandera de riesgo
+            let borderClass, bgClass;
+            if (recommendation.color === 'text-red-600') {
+                borderClass = 'border-red-500';
+                bgClass = 'bg-red-100';
+            } else if (recommendation.color === 'text-orange-500') {
+                borderClass = 'border-orange-500';
+                bgClass = 'bg-orange-100';
+            } else {
+                borderClass = 'border-blue-500';
+                bgClass = 'bg-blue-100';
+            }
+
+            div.className = `p-3 rounded-lg border-l-4 ${bgClass} ${borderClass}`;
+            div.innerHTML = `<p class="font-medium ${recommendation.color}">${recommendation.text}</p>`;
+            return div;
+        }
+    </script>
+</body>
+</html>
